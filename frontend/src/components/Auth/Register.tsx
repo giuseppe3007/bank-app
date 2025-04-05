@@ -357,7 +357,7 @@ const Register: React.FC = () => {
         </Card>
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <Typography variant="body2" color="white">
-            © {new Date().getFullYear()} ItaliaBanca — Tutti i diritti riservati
+            © {new Date().getFullYear()} BankApp — Tutti i diritti riservati
           </Typography>
         </Box>
       </Container>

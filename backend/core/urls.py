@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from accounts.views import current_user, register
@@ -23,6 +24,11 @@ from investments.views import InvestmentViewSet, InvestmentTransactionViewSet
 from loans.views import LoanViewSet, LoanApplicationViewSet, LoanPaymentViewSet
 from insurance.views import (InsurancePolicyViewSet, InsuranceClaimViewSet, 
                              InsurancePaymentViewSet, PolicyActivityViewSet)
+
+# drf-yasg imports
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
@@ -46,6 +52,20 @@ router.register(r'insurance-claims', InsuranceClaimViewSet, basename='insurance-
 router.register(r'insurance-payments', InsurancePaymentViewSet, basename='insurance-payment')
 router.register(r'policy-activities', PolicyActivityViewSet, basename='policy-activity')
 
+# Schema view per Swagger/OpenAPI
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Bank App API",
+        default_version='v1',
+        description="API per la gestione di conti bancari, transazioni, prestiti, investimenti e assicurazioni",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@example.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
@@ -57,4 +77,9 @@ urlpatterns = [
     path('api/register/', register, name='register'),
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),  # For browsable API authentication
+    
+    # Swagger/OpenAPI endpoints
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
