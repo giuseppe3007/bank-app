@@ -1,0 +1,2563 @@
+openapi: 3.0.0
+info:
+  title: Bank App API - Accounts
+  description: API per la gestione dei conti bancari
+  version: 1.0.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        account_number:
+          type: string
+          readOnly: true
+        account_type:
+          type: string
+          enum:
+          - checking
+          - savings
+          - investment
+        balance:
+          type: string
+          format: decimal
+          readOnly: true
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        account:
+          type: integer
+          format: int64
+        destination_account:
+          type: integer
+          format: int64
+          nullable: true
+        transaction_type:
+          type: string
+          enum:
+          - deposit
+          - withdrawal
+          - transfer
+        amount:
+          type: string
+          format: decimal
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+        balance_after_transaction:
+          type: string
+          format: decimal
+          readOnly: true
+    AccountList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+    InsurancePolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        policy_number:
+          type: string
+          readOnly: true
+        policy_type:
+          type: string
+          enum:
+          - health
+          - life
+          - home
+          - car
+          - travel
+        premium_amount:
+          type: string
+          format: decimal
+        coverage_amount:
+          type: string
+          format: decimal
+        status:
+          type: string
+          enum:
+          - pending
+          - active
+          - expired
+          - cancelled
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        linked_account:
+          type: integer
+          format: int64
+        payment_frequency:
+          type: string
+          enum:
+          - monthly
+          - quarterly
+          - semi_annual
+          - annual
+        beneficiary:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    InsuranceClaim:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        policy:
+          type: integer
+          format: int64
+        claim_amount:
+          type: string
+          format: decimal
+        claim_reason:
+          type: string
+        status:
+          type: string
+          enum:
+          - submitted
+          - in_review
+          - approved
+          - rejected
+          - paid
+          readOnly: true
+        submission_date:
+          type: string
+          format: date-time
+          readOnly: true
+        decision_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        decision_reason:
+          type: string
+          nullable: true
+        payment_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        payment_amount:
+          type: string
+          format: decimal
+          nullable: true
+          readOnly: true
+    InsurancePayment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        policy:
+          type: integer
+          format: int64
+        amount:
+          type: string
+          format: decimal
+        payment_date:
+          type: string
+          format: date-time
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+        payment_method:
+          type: string
+          enum:
+          - account
+          - card
+          - bank_transfer
+        source_account:
+          type: integer
+          format: int64
+          nullable: true
+        status:
+          type: string
+          enum:
+          - paid
+          - pending
+          - failed
+          readOnly: true
+    InsurancePolicyList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsurancePolicy'
+    InsuranceClaimList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsuranceClaim'
+    InsurancePaymentList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InsurancePayment'
+    Investment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        investment_type:
+          type: string
+          enum:
+          - bonds
+          - stocks
+          - etf
+          - fund
+          - deposit
+        amount:
+          type: string
+          format: decimal
+        interest_rate:
+          type: string
+          format: decimal
+        term_months:
+          type: integer
+          minimum: 1
+        expected_return:
+          type: string
+          format: decimal
+          readOnly: true
+        status:
+          type: string
+          enum:
+          - pending
+          - active
+          - matured
+          - closed
+          readOnly: true
+        source_account:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        maturity_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+    InvestmentTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        investment:
+          type: integer
+          format: int64
+        transaction_type:
+          type: string
+          enum:
+          - deposit
+          - withdrawal
+          - interest
+          - fee
+        amount:
+          type: string
+          format: decimal
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+        description:
+          type: string
+        source_account:
+          type: integer
+          format: int64
+          nullable: true
+        destination_account:
+          type: integer
+          format: int64
+          nullable: true
+    InvestmentList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Investment'
+    InvestmentTransactionList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvestmentTransaction'
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+        term_months:
+          type: integer
+          minimum: 1
+        interest_rate:
+          type: string
+          format: decimal
+        monthly_payment:
+          type: string
+          format: decimal
+          readOnly: true
+        total_payment:
+          type: string
+          format: decimal
+          readOnly: true
+        remaining_amount:
+          type: string
+          format: decimal
+          readOnly: true
+        status:
+          type: string
+          enum:
+          - pending
+          - approved
+          - active
+          - paid
+          - rejected
+          readOnly: true
+        purpose:
+          type: string
+        linked_account:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        approved_at:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+    LoanApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        loan:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - pending
+          - approved
+          - rejected
+        application_date:
+          type: string
+          format: date-time
+          readOnly: true
+        decision_date:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        decision_reason:
+          type: string
+          nullable: true
+    LoanPayment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        loan:
+          type: integer
+          format: int64
+        amount:
+          type: string
+          format: decimal
+        payment_date:
+          type: string
+          format: date-time
+          readOnly: true
+        payment_method:
+          type: string
+          enum:
+          - account
+          - card
+          - bank_transfer
+        source_account:
+          type: integer
+          format: int64
+          nullable: true
+        remaining_balance:
+          type: string
+          format: decimal
+          readOnly: true
+    LoanList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Loan'
+    LoanApplicationList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanApplication'
+    LoanPaymentList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LoanPayment'
+    TransactionList:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+paths:
+  /accounts/:
+    get:
+      tags:
+      - Accounts
+      summary: Lista dei conti
+      description: Restituisce l'elenco dei conti dell'utente autenticato
+      operationId: listAccounts
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: account_type
+        in: query
+        description: Tipo di conto
+        required: false
+        schema:
+          type: string
+          enum:
+          - checking
+          - savings
+          - investment
+      responses:
+        '200':
+          description: Elenco dei conti ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Accounts
+      summary: Crea un nuovo conto
+      description: Crea un nuovo conto bancario per l'utente autenticato
+      operationId: createAccount
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - account_type
+              - currency
+              properties:
+                account_type:
+                  type: string
+                  enum:
+                  - checking
+                  - savings
+                  - investment
+                currency:
+                  type: string
+                  enum:
+                  - EUR
+                  - USD
+                  - GBP
+                initial_deposit:
+                  type: number
+                  format: double
+                  minimum: 0
+      responses:
+        '201':
+          description: Conto creato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /accounts/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del conto
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Accounts
+      summary: Dettagli di un conto
+      description: Restituisce i dettagli di un conto specifico
+      operationId: retrieveAccount
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli del conto ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - Accounts
+      summary: Aggiorna un conto
+      description: Aggiorna i dettagli di un conto specifico
+      operationId: updateAccount
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_type:
+                  type: string
+                  enum:
+                  - checking
+                  - savings
+                  - investment
+                is_active:
+                  type: boolean
+      responses:
+        '200':
+          description: Conto aggiornato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Accounts
+      summary: Elimina un conto
+      description: Disattiva un conto specifico (non elimina realmente il record)
+      operationId: deleteAccount
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Conto eliminato con successo
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /accounts/{id}/deposit/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del conto
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Accounts
+      summary: Effettua un deposito
+      description: Deposita fondi su un conto specifico
+      operationId: depositFunds
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - amount
+              properties:
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Deposito effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /accounts/{id}/withdraw/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del conto
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Accounts
+      summary: Effettua un prelievo
+      description: Preleva fondi da un conto specifico
+      operationId: withdrawFunds
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - amount
+              properties:
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Prelievo effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Errore di validazione o fondi insufficienti
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /accounts/{id}/transfer/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del conto di origine
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Accounts
+      summary: Effettua un trasferimento
+      description: Trasferisce fondi da un conto ad un altro
+      operationId: transferFunds
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - destination_account
+              - amount
+              properties:
+                destination_account:
+                  type: integer
+                  format: int64
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Trasferimento effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Errore di validazione o fondi insufficienti
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conto non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-policies/:
+    get:
+      tags:
+      - Insurance
+      summary: Lista delle polizze assicurative
+      description: Restituisce l'elenco delle polizze assicurative dell'utente autenticato
+      operationId: listInsurancePolicies
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: policy_type
+        in: query
+        description: Tipo di polizza
+        required: false
+        schema:
+          type: string
+          enum:
+          - health
+          - life
+          - home
+          - car
+          - travel
+      - name: status
+        in: query
+        description: Stato della polizza
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - active
+          - expired
+          - cancelled
+      responses:
+        '200':
+          description: Elenco delle polizze ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePolicyList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Insurance
+      summary: Crea una nuova polizza assicurativa
+      description: Crea una nuova polizza assicurativa per l'utente autenticato
+      operationId: createInsurancePolicy
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - policy_type
+              - premium_amount
+              - coverage_amount
+              - start_date
+              - end_date
+              - linked_account
+              - payment_frequency
+              properties:
+                policy_type:
+                  type: string
+                  enum:
+                  - health
+                  - life
+                  - home
+                  - car
+                  - travel
+                premium_amount:
+                  type: number
+                  format: double
+                  minimum: 1
+                coverage_amount:
+                  type: number
+                  format: double
+                  minimum: 1
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                linked_account:
+                  type: integer
+                  format: int64
+                payment_frequency:
+                  type: string
+                  enum:
+                  - monthly
+                  - quarterly
+                  - semi_annual
+                  - annual
+                beneficiary:
+                  type: string
+      responses:
+        '201':
+          description: Polizza creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePolicy'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-policies/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID della polizza
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Insurance
+      summary: Dettagli di una polizza
+      description: Restituisce i dettagli di una polizza specifica
+      operationId: retrieveInsurancePolicy
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli della polizza ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePolicy'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Polizza non trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - Insurance
+      summary: Aggiorna una polizza
+      description: Aggiorna i dettagli di una polizza specifica
+      operationId: updateInsurancePolicy
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                premium_amount:
+                  type: number
+                  format: double
+                  minimum: 1
+                coverage_amount:
+                  type: number
+                  format: double
+                  minimum: 1
+                end_date:
+                  type: string
+                  format: date
+                payment_frequency:
+                  type: string
+                  enum:
+                  - monthly
+                  - quarterly
+                  - semi_annual
+                  - annual
+                beneficiary:
+                  type: string
+      responses:
+        '200':
+          description: Polizza aggiornata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePolicy'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Polizza non trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Insurance
+      summary: Cancella una polizza
+      description: Cancella una polizza specifica (non elimina realmente il record)
+      operationId: cancelInsurancePolicy
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Polizza cancellata con successo
+        '400':
+          description: Errore nell'operazione di cancellazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Polizza non trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-claims/:
+    get:
+      tags:
+      - Insurance
+      summary: Lista dei sinistri assicurativi
+      description: Restituisce l'elenco dei sinistri assicurativi dell'utente autenticato
+      operationId: listInsuranceClaims
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: policy
+        in: query
+        description: ID della polizza
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        description: Stato del sinistro
+        required: false
+        schema:
+          type: string
+          enum:
+          - submitted
+          - in_review
+          - approved
+          - rejected
+          - paid
+      responses:
+        '200':
+          description: Elenco dei sinistri ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceClaimList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Insurance
+      summary: Presenta un nuovo sinistro
+      description: Presenta un nuovo sinistro assicurativo per una polizza
+      operationId: createInsuranceClaim
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - policy
+              - claim_amount
+              - claim_reason
+              properties:
+                policy:
+                  type: integer
+                  format: int64
+                claim_amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                claim_reason:
+                  type: string
+      responses:
+        '201':
+          description: Sinistro presentato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceClaim'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-claims/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del sinistro
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Insurance
+      summary: Dettagli di un sinistro
+      description: Restituisce i dettagli di un sinistro specifico
+      operationId: retrieveInsuranceClaim
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli del sinistro ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceClaim'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Sinistro non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-claims/{id}/approve/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del sinistro
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Insurance
+      summary: Approva un sinistro
+      description: Approva un sinistro assicurativo (riservato agli amministratori)
+      operationId: approveInsuranceClaim
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - payment_amount
+              properties:
+                payment_amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                decision_reason:
+                  type: string
+      responses:
+        '200':
+          description: Sinistro approvato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceClaim'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Sinistro non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-claims/{id}/reject/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del sinistro
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Insurance
+      summary: Rifiuta un sinistro
+      description: Rifiuta un sinistro assicurativo (riservato agli amministratori)
+      operationId: rejectInsuranceClaim
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - decision_reason
+              properties:
+                decision_reason:
+                  type: string
+      responses:
+        '200':
+          description: Sinistro rifiutato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceClaim'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Sinistro non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /insurance-payments/:
+    get:
+      tags:
+      - Insurance
+      summary: Lista dei pagamenti delle polizze
+      description: Restituisce l'elenco dei pagamenti effettuati per le polizze
+      operationId: listInsurancePayments
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: policy
+        in: query
+        description: ID della polizza
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        description: Stato del pagamento
+        required: false
+        schema:
+          type: string
+          enum:
+          - paid
+          - pending
+          - failed
+      responses:
+        '200':
+          description: Elenco dei pagamenti ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePaymentList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Insurance
+      summary: Effettua un pagamento
+      description: Effettua un pagamento per una polizza assicurativa
+      operationId: createInsurancePayment
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - policy
+              - amount
+              - payment_method
+              - due_date
+              properties:
+                policy:
+                  type: integer
+                  format: int64
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                payment_method:
+                  type: string
+                  enum:
+                  - account
+                  - card
+                  - bank_transfer
+                source_account:
+                  type: integer
+                  format: int64
+                due_date:
+                  type: string
+                  format: date
+      responses:
+        '201':
+          description: Pagamento effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsurancePayment'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /investments/:
+    get:
+      tags:
+      - Investments
+      summary: Lista degli investimenti
+      description: Restituisce l'elenco degli investimenti dell'utente autenticato
+      operationId: listInvestments
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: investment_type
+        in: query
+        description: Tipo di investimento
+        required: false
+        schema:
+          type: string
+          enum:
+          - bonds
+          - stocks
+          - etf
+          - fund
+          - deposit
+      - name: status
+        in: query
+        description: Stato dell'investimento
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - active
+          - matured
+          - closed
+      responses:
+        '200':
+          description: Elenco degli investimenti ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Investments
+      summary: Crea un nuovo investimento
+      description: Crea un nuovo investimento per l'utente autenticato
+      operationId: createInvestment
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - investment_type
+              - amount
+              - interest_rate
+              - term_months
+              - source_account
+              properties:
+                investment_type:
+                  type: string
+                  enum:
+                  - bonds
+                  - stocks
+                  - etf
+                  - fund
+                  - deposit
+                amount:
+                  type: number
+                  format: double
+                  minimum: 1
+                interest_rate:
+                  type: number
+                  format: double
+                  minimum: 0
+                term_months:
+                  type: integer
+                  minimum: 1
+                source_account:
+                  type: integer
+                  format: int64
+      responses:
+        '201':
+          description: Investimento creato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Investment'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /investments/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID dell'investimento
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Investments
+      summary: Dettagli di un investimento
+      description: Restituisce i dettagli di un investimento specifico
+      operationId: retrieveInvestment
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli dell'investimento ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Investment'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Investimento non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - Investments
+      summary: Aggiorna un investimento
+      description: Aggiorna i dettagli di un investimento specifico
+      operationId: updateInvestment
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                investment_type:
+                  type: string
+                  enum:
+                  - bonds
+                  - stocks
+                  - etf
+                  - fund
+                  - deposit
+                interest_rate:
+                  type: number
+                  format: double
+                  minimum: 0
+                term_months:
+                  type: integer
+                  minimum: 1
+      responses:
+        '200':
+          description: Investimento aggiornato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Investment'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Investimento non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Investments
+      summary: Chiude un investimento
+      description: Chiude un investimento specifico (non elimina realmente il record)
+      operationId: closeInvestment
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Investimento chiuso con successo
+        '400':
+          description: Errore nell'operazione di chiusura
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Investimento non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /investment-transactions/:
+    get:
+      tags:
+      - Investments
+      summary: Lista delle transazioni di investimento
+      description: Restituisce l'elenco delle transazioni di investimento dell'utente
+        autenticato
+      operationId: listInvestmentTransactions
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: investment
+        in: query
+        description: ID dell'investimento
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: transaction_type
+        in: query
+        description: Tipo di transazione
+        required: false
+        schema:
+          type: string
+          enum:
+          - deposit
+          - withdrawal
+          - interest
+          - fee
+      responses:
+        '200':
+          description: Elenco delle transazioni ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentTransactionList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Investments
+      summary: Crea una nuova transazione di investimento
+      description: Aggiunge fondi a un investimento o preleva fondi da un investimento
+      operationId: createInvestmentTransaction
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - investment
+              - transaction_type
+              - amount
+              properties:
+                investment:
+                  type: integer
+                  format: int64
+                transaction_type:
+                  type: string
+                  enum:
+                  - deposit
+                  - withdrawal
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                description:
+                  type: string
+                source_account:
+                  type: integer
+                  format: int64
+                  description: Richiesto per i depositi
+                destination_account:
+                  type: integer
+                  format: int64
+                  description: Richiesto per i prelievi
+      responses:
+        '201':
+          description: Transazione creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentTransaction'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loans/:
+    get:
+      tags:
+      - Loans
+      summary: Lista dei prestiti
+      description: Restituisce l'elenco dei prestiti dell'utente autenticato
+      operationId: listLoans
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: status
+        in: query
+        description: Stato del prestito
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - approved
+          - active
+          - paid
+          - rejected
+      responses:
+        '200':
+          description: Elenco dei prestiti ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Loans
+      summary: Richiede un nuovo prestito
+      description: Crea una nuova richiesta di prestito
+      operationId: createLoan
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - amount
+              - term_months
+              - interest_rate
+              - purpose
+              - linked_account
+              properties:
+                amount:
+                  type: number
+                  format: double
+                  minimum: 100
+                term_months:
+                  type: integer
+                  minimum: 1
+                interest_rate:
+                  type: number
+                  format: double
+                purpose:
+                  type: string
+                linked_account:
+                  type: integer
+                  format: int64
+      responses:
+        '201':
+          description: Richiesta di prestito creata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loans/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del prestito
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Loans
+      summary: Dettagli di un prestito
+      description: Restituisce i dettagli di un prestito specifico
+      operationId: retrieveLoan
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli del prestito ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestito non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loans/{id}/apply/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del prestito
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Loans
+      summary: Invia richiesta di prestito
+      description: Invia ufficialmente una richiesta di prestito per la valutazione
+      operationId: applyForLoan
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Richiesta inviata con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplication'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestito non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loans/{id}/approve/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del prestito
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Loans
+      summary: Approva un prestito
+      description: Approva una richiesta di prestito (riservato agli amministratori)
+      operationId: approveLoan
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Prestito approvato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestito non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loans/{id}/reject/:
+    parameters:
+    - name: id
+      in: path
+      description: ID del prestito
+      required: true
+      schema:
+        type: integer
+        format: int64
+    post:
+      tags:
+      - Loans
+      summary: Rifiuta un prestito
+      description: Rifiuta una richiesta di prestito (riservato agli amministratori)
+      operationId: rejectLoan
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  description: Motivo del rifiuto
+      responses:
+        '200':
+          description: Prestito rifiutato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loan'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Prestito non trovato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loan-applications/:
+    get:
+      tags:
+      - Loans
+      summary: Lista delle richieste di prestito
+      description: Restituisce l'elenco delle richieste di prestito dell'utente autenticato
+      operationId: listLoanApplications
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: status
+        in: query
+        description: Stato della richiesta
+        required: false
+        schema:
+          type: string
+          enum:
+          - pending
+          - approved
+          - rejected
+      responses:
+        '200':
+          description: Elenco delle richieste ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanApplicationList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /loan-payments/:
+    get:
+      tags:
+      - Loans
+      summary: Lista dei pagamenti dei prestiti
+      description: Restituisce l'elenco dei pagamenti effettuati sui prestiti
+      operationId: listLoanPayments
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: loan
+        in: query
+        description: ID del prestito
+        required: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Elenco dei pagamenti ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanPaymentList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+      - Loans
+      summary: Effettua un pagamento
+      description: Effettua un pagamento su un prestito
+      operationId: createLoanPayment
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - loan
+              - amount
+              - payment_method
+              properties:
+                loan:
+                  type: integer
+                  format: int64
+                amount:
+                  type: number
+                  format: double
+                  minimum: 0.01
+                payment_method:
+                  type: string
+                  enum:
+                  - account
+                  - card
+                  - bank_transfer
+                source_account:
+                  type: integer
+                  format: int64
+      responses:
+        '201':
+          description: Pagamento effettuato con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoanPayment'
+        '400':
+          description: Errore di validazione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /transactions/:
+    get:
+      tags:
+      - Transactions
+      summary: Lista delle transazioni
+      description: Restituisce l'elenco delle transazioni dell'utente autenticato
+      operationId: listTransactions
+      security:
+      - bearerAuth: []
+      parameters:
+      - name: page
+        in: query
+        description: Numero di pagina
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: account
+        in: query
+        description: ID del conto
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - name: transaction_type
+        in: query
+        description: Tipo di transazione
+        required: false
+        schema:
+          type: string
+          enum:
+          - deposit
+          - withdrawal
+          - transfer
+      - name: start_date
+        in: query
+        description: Data di inizio (formato YYYY-MM-DD)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: end_date
+        in: query
+        description: Data di fine (formato YYYY-MM-DD)
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: min_amount
+        in: query
+        description: Importo minimo
+        required: false
+        schema:
+          type: number
+          format: double
+      - name: max_amount
+        in: query
+        description: Importo massimo
+        required: false
+        schema:
+          type: number
+          format: double
+      responses:
+        '200':
+          description: Elenco delle transazioni ottenuto con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionList'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /transactions/{id}/:
+    parameters:
+    - name: id
+      in: path
+      description: ID della transazione
+      required: true
+      schema:
+        type: integer
+        format: int64
+    get:
+      tags:
+      - Transactions
+      summary: Dettagli di una transazione
+      description: Restituisce i dettagli di una transazione specifica
+      operationId: retrieveTransaction
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Dettagli della transazione ottenuti con successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          description: Non autenticato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Non autorizzato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Transazione non trovata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
